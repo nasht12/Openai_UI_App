@@ -1,23 +1,38 @@
 import Head from "next/head";
 import { useState } from "react";
+import Button from "@mui/material/Button";
 import styles from "./index.module.css";
 
 export default function Home() {
-  const [animalInput, setAnimalInput] = useState("");
+  const [textInput, setTextInput] = useState("");
   const [result, setResult] = useState();
+  const [placeResult, setPlaceResult] = useState();
 
   async function onSubmit(event) {
     event.preventDefault();
-    const response = await fetch("/api/generate", {
+    const response = await fetch("/api/textsearch", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ animal: animalInput }),
+      body: JSON.stringify({ input: textInput }),
     });
     const data = await response.json();
     setResult(data.result);
-    setAnimalInput("");
+    setTextInput("");
+  }
+
+  async function onResultClick(event) {
+    const response = await fetch("/api/onclick", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ input: textInput, place: result }),
+    });
+    const placeresult = await response.json();
+    setPlaceResult(placeresult.result);
+    setTextInput("");
   }
 
   return (
@@ -33,14 +48,16 @@ export default function Home() {
         <form onSubmit={onSubmit}>
           <input
             type="text"
-            name="animal"
-            placeholder="Enter an animal"
-            value={animalInput}
-            onChange={(e) => setAnimalInput(e.target.value)}
+            name="country"
+            placeholder="Enter an country"
+            value={textInput}
+            onChange={(e) => setTextInput(e.target.value)}
           />
           <input type="submit" value="Generate names" />
         </form>
-        <div className={styles.result}>{result}</div>
+        <div>
+          <Button onClick={onResultClick}>Answer: {result}</Button>
+        </div>
       </main>
     </div>
   );
